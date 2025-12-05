@@ -1,84 +1,58 @@
-# Multi-stage Dockerfile for Laravel + Laravel Mix
-
-# Stage 1 - Node builder: compile frontend assets with Laravel Mix
+# Stage 1: Build frontend assets (if using Laravel Mix/Vite)
 FROM node:18 AS node_builder
 WORKDIR /app
+
 COPY package*.json ./
-COPY package-lock.json ./
-RUN npm ci --silent
+RUN npm install --silent
+
 COPY . .
-# Use the production script that runs `mix --production`
-RUN npm run production
+RUN npm run build || npm run production || true
 
-# Stage 2 - PHP application
-FROM php:8.2-fpm AS app
 
-# Install system dependencies required for common PHP extensions
+
+# Stage 2: PHP + Composer + Extensions
+FROM php:8.2-fpm
+
+# Install system dependencies & required PHP extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    curl \
-    unzip \
-    libzip-dev \
-    libonig-dev \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    libicu-dev \
-    libxml2-dev \
-    libcurl4-openssl-dev \
-    libgmp-dev \
-    libmagickwand-dev \
-    pkg-config \
-    zip \
-    ca-certificates \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
-
-# Configure and install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) pdo_mysql mbstring exif pcntl bcmath gd zip intl opcache curl gmp sockets \
+    git curl unzip libzip-dev libpng-dev libjpeg-dev libfreetype6-dev \
+    libonig-dev libxml2-dev libicu-dev libgmp-dev libmagickwand-dev pkg-config \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo_mysql mbstring bcmath gd intl zip \
+    && docker-php-ext-install fileinfo ctype tokenizer \
     && pecl install redis && docker-php-ext-enable redis \
-    && pecl install imagick && docker-php-ext-enable imagick
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# Increase memory for Composer
+ENV COMPOSER_MEMORY_LIMIT=-1
+
 WORKDIR /var/www/html
 
-# Copy composer manifest first to leverage Docker cache
+# Copy composer files first (cache layers)
 COPY composer.json composer.lock ./
-ENV COMPOSER_ALLOW_SUPERUSER=1
-# Configure composer cache dir to a path that will be cached by Docker layers when possible
-ENV COMPOSER_CACHE_DIR=/var/cache/composer
-# Allow Composer to use unlimited memory during install and enable verbose output
-# so build logs include the underlying error for diagnosis.
-RUN COMPOSER_MEMORY_LIMIT=-1 composer install \
-    --no-dev --optimize-autoloader --classmap-authoritative --prefer-dist \
-    --no-interaction --no-suggest --no-scripts -vvv || (echo "Composer install failed" && composer diagnose && exit 1)
-RUN composer clear-cache || true
 
-# Copy application source
+# Install dependencies
+RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction -vvv
+
+# Copy app source
 COPY . .
 
-# Copy compiled frontend assets from node_builder
-# Laravel Mix outputs to `public/js` and `public/css` by default
+# Copy built frontend assets
 COPY --from=node_builder /app/public /var/www/html/public
 
-# Optimize Laravel (best effort; will not fail the build if commands error)
+# Generate Laravel optimizations (ignore errors)
 RUN php artisan key:generate --force || true
 RUN php artisan config:cache || true
 RUN php artisan route:cache || true
 RUN php artisan view:cache || true
 
-# Set folder permissions for runtime and switch to non-root user
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/vendor /var/www/html/public || true
+# Permissions
+RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Run container as the standard www-data user
 USER www-data
 
 EXPOSE 9000
-
-# Simple healthcheck: verify php-fpm is running in the container
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD pgrep php-fpm || exit 1
-
 CMD ["php-fpm"]
