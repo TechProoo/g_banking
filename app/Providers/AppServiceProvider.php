@@ -42,18 +42,22 @@ class AppServiceProvider extends ServiceProvider
 
         // Ensure necessary storage directories exist to avoid filesystem errors
         $storageDirs = [
-            storage_path('framework/sessions'),
-            storage_path('framework/views'),
-            storage_path('framework/cache'),
-            storage_path('framework/cache/data'),
-            storage_path('logs'),
-            storage_path('app'),
-            bootstrap_path('cache'),
+            \storage_path('framework/sessions'),
+            \storage_path('framework/views'),
+            \storage_path('framework/cache'),
+            \storage_path('framework/cache/data'),
+            \storage_path('logs'),
+            \storage_path('app'),
         ];
+
+        // compute bootstrap cache dir without calling bootstrap_path() which may not be available yet
+        $projectRoot = dirname(__DIR__, 3);
+        $bootstrapCache = $projectRoot . DIRECTORY_SEPARATOR . 'bootstrap' . DIRECTORY_SEPARATOR . 'cache';
+        $storageDirs[] = $bootstrapCache;
 
         foreach ($storageDirs as $dir) {
             try {
-                if (!is_dir($dir)) {
+                if (!\is_dir($dir)) {
                     @mkdir($dir, 0777, true);
                 }
                 @chmod($dir, 0777);
