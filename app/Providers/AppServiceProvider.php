@@ -49,6 +49,7 @@ class AppServiceProvider extends ServiceProvider
         try {
             if (!Schema::hasTable('sessions')) {
                 config(['session.driver' => 'file']);
+                
                 Log::warning('Session table not found — falling back to file session driver.');
             }
         } catch (\Exception $e) {
