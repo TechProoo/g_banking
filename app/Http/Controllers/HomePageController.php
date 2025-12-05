@@ -14,11 +14,14 @@ use App\Models\TermsPrivacy;
 use Illuminate\Support\Facades\DB;
 use App\Mail\NewNotification;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
+use Exception;
 
 class HomePageController extends Controller
 {
     public function index(){
-        $settings=Settings::where('id', '=', '1')->first();
+        $settings = $this->safeSettings();
         //sum total deposited
         $total_deposits = Deposit::where('status','processed')->sum('amount');
         
@@ -40,7 +43,7 @@ class HomePageController extends Controller
             'test'=> Testimony::orderby('id', 'desc')->get(),
             'withdrawals' => Withdrawal::orderby('id','DESC')->take(7)->get(),
             'deposits' => Deposit::orderby('id','DESC')->take(7)->get(),
-            'title' => $settings->site_title,
+            'title' => $settings->site_title ?? config('app.name'),
             'mplans' => Plans::where('type','Main')->get(),
             'pplans' => Plans::where('type','Promo')->get(),
         ));
@@ -48,7 +51,7 @@ class HomePageController extends Controller
 
 
 public function investment(){
-        $settings=Settings::where('id', '=', '1')->first();
+    $settings = $this->safeSettings();
         //sum total deposited
         $total_deposits = Deposit::where('status','processed')->sum('amount');
         
@@ -70,7 +73,7 @@ public function investment(){
             'test'=> Testimony::orderby('id', 'desc')->get(),
             'withdrawals' => Withdrawal::orderby('id','DESC')->take(7)->get(),
             'deposits' => Deposit::orderby('id','DESC')->take(7)->get(),
-            'title' => $settings->site_title,
+            'title' => $settings->site_title ?? config('app.name'),
             'mplans' => Plans::where('type','Main')->get(),
             'pplans' => Plans::where('type','Promo')->get(),
         ));
@@ -78,7 +81,7 @@ public function investment(){
 
 
 public function statistics(){
-        $settings=Settings::where('id', '=', '1')->first();
+    $settings = $this->safeSettings();
         //sum total deposited
         $total_deposits = Deposit::where('status','processed')->sum('amount');
         
@@ -100,7 +103,7 @@ public function statistics(){
             'test'=> Testimony::orderby('id', 'desc')->get(),
             'withdrawals' => Withdrawal::orderby('id','DESC')->take(7)->get(),
             'deposits' => Deposit::orderby('id','DESC')->take(7)->get(),
-            'title' => $settings->site_title,
+            'title' => $settings->site_title ?? config('app.name'),
             'mplans' => Plans::where('type','Main')->get(),
             'pplans' => Plans::where('type','Promo')->get(),
         ));
@@ -110,13 +113,12 @@ public function statistics(){
 
     //Licensing and registration route
     public function licensing(){
-        
         return view('home.licensing')
         ->with(array(
             'mplans' => Plans::where('type','Main')->get(),
             'pplans' => Plans::where('type','Promo')->get(),
             'title' => 'Licensing, regulation and registration',
-            'settings' => Settings::where('id', '=', '1')->first(),
+            'settings' => $this->safeSettings(),
         ));
     }
 //tradebots
@@ -133,20 +135,18 @@ public function tradebots(){
     }
 //careers
 public function business(){
-       
     return view('home.business',)->with(array(
         'title' => 'Business',
-        'settings' => Settings::where('id', '=', '1')->first(),
+        'settings' => $this->safeSettings(),
 ));
     
 }
 
 
 public function personal(){
-       
     return view('home.personal',)->with(array(
         'title' => 'personal',
-        'settings' => Settings::where('id', '=', '1')->first(),
+        'settings' => $this->safeSettings(),
 ));
     
 }
@@ -154,29 +154,26 @@ public function personal(){
 
 
 public function cards(){
-       
     return view('home.cards',)->with(array(
         'title' => 'cards',
-        'settings' => Settings::where('id', '=', '1')->first(),
+        'settings' => $this->safeSettings(),
 ));
     
 }
 
 
 public function loans(){
-       
     return view('home.loans',)->with(array(
         'title' => 'loans',
-        'settings' => Settings::where('id', '=', '1')->first(),
+        'settings' => $this->safeSettings(),
 ));
     
 }
 
 public function app(){
-       
     return view('home.app',)->with(array(
         'title' => 'app',
-        'settings' => Settings::where('id', '=', '1')->first(),
+        'settings' => $this->safeSettings(),
 ));
     
 }
@@ -184,49 +181,54 @@ public function app(){
 
     //Terms of service route
     public function terms(){
-        
         return view('home.terms')
         ->with(array(
             'mplans' => Plans::where('type','Main')->get(),
             'title' => 'Terms of Service',
-            'settings' => Settings::where('id', '=', '1')->first(),
+            'settings' => $this->safeSettings(),
         ));
     }
 
     //Privacy policy route
     public function privacy(){
-        $terms = TermsPrivacy::find(1);
-        if ($terms->useterms == 'no') {
+        $terms = null;
+        try {
+            if (Schema::hasTable('terms_privacy')) {
+                $terms = TermsPrivacy::find(1);
+            }
+        } catch (Exception $e) {
+            Log::warning('Could not fetch terms: ' . $e->getMessage());
+        }
+
+        if ($terms && ($terms->useterms ?? null) == 'no') {
            return redirect()->back();
         }
+
         return view('home.privacy')
         ->with(array(
             'mplans' => Plans::where('type','Main')->get(),
             'title' => 'Privacy Policy',
-            'settings' => Settings::where('id', '=', '1')->first(),
+            'settings' => $this->safeSettings(),
         ));
     }
 
     //FAQ route
     public function faq(){
-        
         return view('home.faq')
         ->with(array(
             'title' => 'FAQs',
             'faqs'=> Faq::orderby('id', 'desc')->get(),
-            'settings' => Settings::where('id', '=', '1')->first(),
+            'settings' => $this->safeSettings(),
         ));
     }
 
     //about route
     public function about(){
-        
         return view('home.about')
         ->with(array(
             'mplans' => Plans::where('type','Main')->get(),
-                
             'title' => 'About',
-            'settings' => Settings::where('id', '=', '1')->first(),
+            'settings' => $this->safeSettings(),
         ));
     }
 
@@ -236,9 +238,8 @@ public function app(){
         ->with(array(
             'mplans' => Plans::where('type','Main')->get(),
                 'pplans' => Plans::where('type','Promo')->get(),
-                
             'title' => 'Contact',
-            'settings' => Settings::where('id', '=', '1')->first(),
+            'settings' => $this->safeSettings(),
         ));
     }
 
@@ -257,10 +258,9 @@ $captcha = "$n1$n2$n3$n4$n5$n6";
 
         return view('home.verify')
         ->with(array(
-          
             'captcha'=> $captcha,
             'title' => 'verify',
-            'settings' => Settings::where('id', '=', '1')->first(),
+            'settings' => $this->safeSettings(),
         ));
     }
     
@@ -280,29 +280,57 @@ $captcha = "$n1$n2$n3$n4$n5$n6";
     //send contact message to admin email
     public function sendcontact(Request $request){
 
-        $settings=Settings::where('id','1')->first();
+        $settings = $this->safeSettings();
         $message = substr(wordwrap($request['message'],70),0,350);
         $subject = "$request->subject, my email $request->email";
 
-        Mail::to($settings->contact_email)->send(new NewNotification($message, $subject, 'Admin'));
-        return redirect()->back()
-        ->with('success', ' Your message was sent successfully!');
+        $contactEmail = $settings->contact_email ?? config('mail.from.address');
+        if (empty($contactEmail)) {
+            Log::warning('Contact email not configured; cannot send contact message.');
+            return redirect()->back()->with('message', 'Contact service currently unavailable.');
+        }
+
+        Mail::to($contactEmail)->send(new NewNotification($message, $subject, 'Admin'));
+        return redirect()->back()->with('success', ' Your message was sent successfully!');
     }
 
 
     public function homesendcontact(Request $request){
 
-        $settings=Settings::where('id','1')->first();
+        $settings = $this->safeSettings();
         $message = substr(wordwrap($request['message'],70),0,350);
         $subject = "$request->subject, my email $request->email";
 
-        Mail::to($settings->contact_email)->send(new NewNotification($message, $subject, 'Admin'));
-        
+        $contactEmail = $settings->contact_email ?? config('mail.from.address');
+        if (empty($contactEmail)) {
+            Log::warning('Contact email not configured; cannot send contact message.');
+            return redirect()->back()->with('message', 'Contact service currently unavailable.');
+        }
+
+        Mail::to($contactEmail)->send(new NewNotification($message, $subject, 'Admin'));
+
          if (Mail::failures()) {
-         return redirect()->back()
-        ->with('message', ' message was not sent! Please try again later');
+             return redirect()->back()->with('message', ' message was not sent! Please try again later');
+         }
+        return redirect()->back()->with('success', ' Your message was sent successfully!');
     }
-        return redirect()->back()
-        ->with('success', ' Your message was sent successfully!');
+
+    /**
+     * Return Settings model safely when DB/table is available.
+     *
+     * @return \App\Models\Settings|null
+     */
+    protected function safeSettings()
+    {
+        $settings = null;
+        try {
+            if (Schema::hasTable('settings')) {
+                $settings = Settings::find(1);
+            }
+        } catch (Exception $e) {
+            Log::warning('Could not fetch settings: ' . $e->getMessage());
+        }
+
+        return $settings;
     }
 }
