@@ -46,7 +46,7 @@ COPY composer.json composer.lock ./
 ENV COMPOSER_ALLOW_SUPERUSER=1
 # Configure composer cache dir to a path that will be cached by Docker layers when possible
 ENV COMPOSER_CACHE_DIR=/var/cache/composer
-RUN composer install --no-dev --optimize-autoloader --classmap-authoritative --prefer-dist --no-interaction --no-progress --no-suggest && composer clear-cache
+RUN composer install --no-dev --optimize-autoloader --classmap-authoritative --prefer-dist --no-interaction --no-progress --no-suggest --no-scripts && composer clear-cache
 
 # Copy application source
 COPY . .
