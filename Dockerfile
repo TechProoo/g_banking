@@ -10,7 +10,7 @@ RUN npm run build || npm run production || true
 
 
 # Stage 2: PHP 8.2 + Composer + Extensions
-FROM php:8.2-fpm
+FROM php:8.1-fpm
 
 # Install system dependencies & PHP extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
