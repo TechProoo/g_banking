@@ -1,4 +1,5 @@
 const mix = require("laravel-mix");
+const webpack = require('webpack');
 
 /*
  |--------------------------------------------------------------------------
@@ -19,8 +20,24 @@ mix.webpackConfig({
         fallback: {
             https: require.resolve("https-browserify"),
             http: require.resolve("stream-http"),
+            stream: require.resolve("stream-browserify"),
+            crypto: require.resolve("crypto-browserify"),
+            path: require.resolve("path-browserify"),
+            zlib: require.resolve("browserify-zlib"),
+            constants: require.resolve("constants-browserify"),
+            assert: require.resolve("assert"),
+            util: require.resolve("util"),
+            fs: false,
+            net: false,
+            tls: false,
         },
     },
+    plugins: [
+        new webpack.ProvidePlugin({
+            process: 'process/browser',
+            Buffer: ['buffer', 'Buffer'],
+        }),
+    ],
 });
 
 if (mix.inProduction()) {
