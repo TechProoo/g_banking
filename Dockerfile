@@ -42,14 +42,17 @@ COPY . .
 # Ensure an environment file exists for artisan commands that expect it
 RUN if [ ! -f .env ]; then cp .env.example .env; fi
 
-# Run composer and artisan tasks that were deferred (package discovery, optimized autoload)
-RUN composer dump-autoload --optimize || true
-RUN php artisan package:discover --ansi || true
+# Ensure an environment file exists for artisan commands that expect it
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
 
-# Ensure Laravel cache directories exist and are writable
+# Ensure Laravel cache directories exist and are writable before running artisan
 RUN mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache || true
+
+# Run composer and artisan tasks that were deferred (package discovery, optimized autoload)
+RUN composer dump-autoload --optimize || true
+RUN php artisan package:discover --ansi || true
 
 # Copy compiled frontend assets
 COPY --from=node_builder /app/public /var/www/html/public
