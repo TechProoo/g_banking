@@ -13,7 +13,14 @@ const axios = require("axios");
 //         console.log(error);
 //     });
 
-let MetaApi = require("metaapi.cloud-sdk").default;
-let CopyFactory = require("metaapi.cloud-sdk").CopyFactory;
+let MetaApi;
+let CopyFactory;
 console.log("Hello");
 alert("jelldl");
+
+// Use the CDN-provided global if available in the browser to avoid bundling
+// the Node-oriented `metaapi.cloud-sdk` into the client bundle.
+if (typeof window !== 'undefined' && window.MetaApi) {
+	MetaApi = window.MetaApi;
+	CopyFactory = window.CopyFactory || window.MetaApi.CopyFactory;
+}

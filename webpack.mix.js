@@ -1,5 +1,5 @@
 const mix = require("laravel-mix");
-const webpack = require('webpack');
+const webpack = require("webpack");
 
 /*
  |--------------------------------------------------------------------------
@@ -34,8 +34,8 @@ mix.webpackConfig({
     },
     plugins: [
         new webpack.ProvidePlugin({
-            process: 'process/browser',
-            Buffer: ['buffer', 'Buffer'],
+            process: "process/browser",
+            Buffer: ["buffer", "Buffer"],
         }),
     ],
 });
