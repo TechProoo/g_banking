@@ -10,7 +10,7 @@ RUN npm run build || npm run production || true
 
 
 # Stage 2: PHP 8.2 + Composer + Extensions
-FROM php:8.1-fpm
+FROM php:8.1-apache
 
 # Install system dependencies & PHP extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -55,12 +55,19 @@ RUN php artisan config:cache || true
 RUN php artisan route:cache || true
 RUN php artisan view:cache || true
 
-# Permissions
-RUN chown -R www-data:www-data storage bootstrap/cache vendor public
+## Configure Apache as the HTTP server
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
-# Run as www-data user
-USER www-data
+# enable common Apache modules
+RUN a2enmod rewrite headers expires deflate
 
-EXPOSE 9000
+# update Apache document root to point to Laravel `public` directory
+RUN sed -ri -e "s!DocumentRoot /var/www/html!DocumentRoot ${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/sites-available/000-default.conf \
+ && sed -ri -e "s!<Directory /var/www/html>!<Directory ${APACHE_DOCUMENT_ROOT}>!g" /etc/apache2/apache2.conf
 
-CMD ["php-fpm"]
+# Permissions (ensure apache can write where needed)
+RUN chown -R www-data:www-data storage bootstrap/cache vendor public || true
+
+EXPOSE 80
+
+CMD ["apache2-foreground"]
