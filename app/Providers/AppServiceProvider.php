@@ -45,6 +45,18 @@ class AppServiceProvider extends ServiceProvider
             return;
         }
 
+        // Ensure session middleware doesn't try to read DB sessions when DB is down
+        try {
+            if (!Schema::hasTable('sessions')) {
+                config(['session.driver' => 'file']);
+                Log::warning('Session table not found — falling back to file session driver.');
+            }
+        } catch (\Exception $e) {
+            // If any DB error occurs, fallback to file sessions so middleware won't crash
+            config(['session.driver' => 'file']);
+            Log::warning('Could not check sessions table — using file session driver: ' . $e->getMessage());
+        }
+
         try {
             if (!Schema::hasTable('settings')) {
                 return;
