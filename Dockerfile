@@ -55,15 +55,17 @@ RUN php artisan config:cache || true
 RUN php artisan route:cache || true
 RUN php artisan view:cache || true
 
-## Configure Apache as the HTTP server
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-
 # enable common Apache modules
 RUN a2enmod rewrite headers expires deflate
 
-# update Apache document root to point to Laravel `public` directory
-RUN sed -ri -e "s!DocumentRoot /var/www/html!DocumentRoot ${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/sites-available/000-default.conf \
- && sed -ri -e "s!<Directory /var/www/html>!<Directory ${APACHE_DOCUMENT_ROOT}>!g" /etc/apache2/apache2.conf
+# If a `public/index.php` exists use it as document root, otherwise use project root
+RUN if [ -f /var/www/html/public/index.php ]; then \
+            sed -ri -e 's!DocumentRoot /var/www/html!DocumentRoot /var/www/html/public!g' /etc/apache2/sites-available/000-default.conf && \
+            sed -ri -e 's!<Directory /var/www/html>!<Directory /var/www/html/public>!g' /etc/apache2/apache2.conf ; \
+        else \
+            sed -ri -e "s!DocumentRoot /var/www/html!DocumentRoot /var/www/html!g" /etc/apache2/sites-available/000-default.conf && \
+            sed -ri -e "s!<Directory /var/www/html>!<Directory /var/www/html>!g" /etc/apache2/apache2.conf ; \
+        fi
 
 # Permissions (ensure apache can write where needed)
 RUN chown -R www-data:www-data storage bootstrap/cache vendor public || true
