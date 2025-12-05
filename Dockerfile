@@ -46,6 +46,11 @@ RUN if [ ! -f .env ]; then cp .env.example .env; fi
 RUN composer dump-autoload --optimize || true
 RUN php artisan package:discover --ansi || true
 
+# Ensure Laravel cache directories exist and are writable
+RUN mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache || true
+
 # Copy compiled frontend assets
 COPY --from=node_builder /app/public /var/www/html/public
 
