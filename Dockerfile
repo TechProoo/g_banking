@@ -50,7 +50,12 @@ COPY composer.json composer.lock ./
 ENV COMPOSER_ALLOW_SUPERUSER=1
 # Configure composer cache dir to a path that will be cached by Docker layers when possible
 ENV COMPOSER_CACHE_DIR=/var/cache/composer
-RUN composer install --no-dev --optimize-autoloader --classmap-authoritative --prefer-dist --no-interaction --no-progress --no-suggest --no-scripts && composer clear-cache
+# Allow Composer to use unlimited memory during install and enable verbose output
+# so build logs include the underlying error for diagnosis.
+RUN COMPOSER_MEMORY_LIMIT=-1 composer install \
+    --no-dev --optimize-autoloader --classmap-authoritative --prefer-dist \
+    --no-interaction --no-suggest --no-scripts -vvv || (echo "Composer install failed" && composer diagnose && exit 1)
+RUN composer clear-cache || true
 
 # Copy application source
 COPY . .
