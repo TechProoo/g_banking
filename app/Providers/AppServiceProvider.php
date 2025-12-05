@@ -40,6 +40,28 @@ class AppServiceProvider extends ServiceProvider
 
         Paginator::useBootstrap();
 
+        // Ensure necessary storage directories exist to avoid filesystem errors
+        $storageDirs = [
+            storage_path('framework/sessions'),
+            storage_path('framework/views'),
+            storage_path('framework/cache'),
+            storage_path('framework/cache/data'),
+            storage_path('logs'),
+            storage_path('app'),
+            bootstrap_path('cache'),
+        ];
+
+        foreach ($storageDirs as $dir) {
+            try {
+                if (!is_dir($dir)) {
+                    @mkdir($dir, 0777, true);
+                }
+                @chmod($dir, 0777);
+            } catch (\Exception $e) {
+                Log::warning('Could not create storage dir ' . $dir . ' : ' . $e->getMessage());
+            }
+        }
+
         // Sharing settings with all views — guard against DB unavailability
         if ($this->app->runningInConsole()) {
             return;
