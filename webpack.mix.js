@@ -13,6 +13,15 @@ const mix = require("laravel-mix");
 
 mix.js("resources/js/app.js", "public/js");
 
+// Provide polyfills for node core modules that older webpack configurations expect
+mix.webpackConfig({
+    resolve: {
+        fallback: {
+            https: require.resolve("https-browserify")
+        }
+    }
+});
+
 if (mix.inProduction()) {
     mix.version();
 }

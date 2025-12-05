@@ -44,7 +44,9 @@ WORKDIR /var/www/html
 # Copy composer manifest first to leverage Docker cache
 COPY composer.json composer.lock ./
 ENV COMPOSER_ALLOW_SUPERUSER=1
-RUN composer install --no-dev --optimize-autoloader --prefer-dist --no-interaction --no-progress && composer clear-cache
+# Configure composer cache dir to a path that will be cached by Docker layers when possible
+ENV COMPOSER_CACHE_DIR=/var/cache/composer
+RUN composer install --no-dev --optimize-autoloader --classmap-authoritative --prefer-dist --no-interaction --no-progress --no-suggest && composer clear-cache
 
 # Copy application source
 COPY . .
@@ -59,8 +61,15 @@ RUN php artisan config:cache || true
 RUN php artisan route:cache || true
 RUN php artisan view:cache || true
 
-# Set folder permissions for runtime
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
+# Set folder permissions for runtime and switch to non-root user
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/vendor /var/www/html/public || true
+
+# Run container as the standard www-data user
+USER www-data
 
 EXPOSE 9000
+
+# Simple healthcheck: verify php-fpm is running in the container
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD pgrep php-fpm || exit 1
+
 CMD ["php-fpm"]
