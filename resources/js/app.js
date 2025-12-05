@@ -20,7 +20,7 @@ alert("jelldl");
 
 // Use the CDN-provided global if available in the browser to avoid bundling
 // the Node-oriented `metaapi.cloud-sdk` into the client bundle.
-if (typeof window !== 'undefined' && window.MetaApi) {
-	MetaApi = window.MetaApi;
-	CopyFactory = window.CopyFactory || window.MetaApi.CopyFactory;
+if (typeof window !== "undefined" && window.MetaApi) {
+    MetaApi = window.MetaApi;
+    CopyFactory = window.CopyFactory || window.MetaApi.CopyFactory;
 }
