@@ -9,9 +9,7 @@
         "prod": "npm run production",
         "production": "mix --production"
     },
-    "dependencies": {
-        "metaapi.cloud-sdk": "^17.0.0"
-    },
+    "dependencies": {},
     "devDependencies": {
         "alpinejs": "^3.7.0",
         "autoprefixer": "^10.0.2",
