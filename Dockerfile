@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libonig-dev libxml2-dev libicu-dev libgmp-dev libmagickwand-dev pkg-config \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_mysql mbstring bcmath gd intl zip \
-    && docker-php-ext-install fileinfo ctype tokenizer \
+    && docker-php-ext-install fileinfo ctype \
     && pecl install redis && docker-php-ext-enable redis \
     && rm -rf /var/lib/apt/lists/*
 
