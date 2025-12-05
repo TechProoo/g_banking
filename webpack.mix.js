@@ -17,9 +17,10 @@ mix.js("resources/js/app.js", "public/js");
 mix.webpackConfig({
     resolve: {
         fallback: {
-            https: require.resolve("https-browserify")
-        }
-    }
+            https: require.resolve("https-browserify"),
+            http: require.resolve("stream-http"),
+        },
+    },
 });
 
 if (mix.inProduction()) {
