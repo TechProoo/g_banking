@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Actions\Jetstream\DeleteUser;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
 use Laravel\Jetstream\Jetstream;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -37,9 +39,16 @@ class JetstreamServiceProvider extends ServiceProvider
         Jetstream::deleteUsersUsing(DeleteUser::class);
 
         Fortify::loginView(function () {
+            try {
+                $settings = Schema::hasTable('settings') ? Settings::find(1) : null;
+            } catch (\Exception $e) {
+                Log::warning('Jetstream loginView settings skipped: ' . $e->getMessage());
+                $settings = null;
+            }
+
             return view('auth.login',[
                 'title' => 'Sign In to Continue',
-                'settings' => Settings::where('id','1')->first(),
+                'settings' => $settings,
             ]);
         });
 
@@ -79,7 +88,7 @@ class JetstreamServiceProvider extends ServiceProvider
                 'title' => 'Register an Account',
                 'user_country'=>$user_country,
                 'countries'=>$countries,
-                'settings' => Settings::where('id','1')->first(),
+                'settings' => (Schema::hasTable('settings') ? Settings::find(1) : null),
             ]);
         });
 
