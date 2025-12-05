@@ -31,11 +31,20 @@ WORKDIR /var/www/html
 # Copy composer files first for caching
 COPY composer.json composer.lock ./
 
-# Install PHP dependencies
-RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction -vvv
+# Install PHP dependencies without running project scripts (we'll run them after copying app)
+RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts -vvv
 
 # Copy app source code
+
+# Copy application source
 COPY . .
+
+# Ensure an environment file exists for artisan commands that expect it
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
+
+# Run composer and artisan tasks that were deferred (package discovery, optimized autoload)
+RUN composer dump-autoload --optimize || true
+RUN php artisan package:discover --ansi || true
 
 # Copy compiled frontend assets
 COPY --from=node_builder /app/public /var/www/html/public
