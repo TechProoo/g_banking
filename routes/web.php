@@ -24,7 +24,7 @@ require __DIR__ . '/botman.php';
 //activate and deactivate Online Trader
 Route::any('/activate', function () {
 	return view('activate.index', [
-		'settings' => Settings::where('id', '1')->first(),
+		'settings' => safe_settings(),
 	]);
 });
 
