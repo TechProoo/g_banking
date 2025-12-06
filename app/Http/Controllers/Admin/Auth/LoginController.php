@@ -42,7 +42,7 @@ class LoginController extends Controller
     {
         return view('auth.adminlogin',[
             'title' => 'Admin Login',
-            'settings' => Settings::where('id', '=', '1')->first(),
+            'settings' => safe_settings(),
         ]);
     }
 
