@@ -20,24 +20,17 @@ class BlockIpAddressMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        try {
-            if (!Schema::hasTable('ipaddresses')) {
-                return $next($request);
-            }
+        // Use safe_query to prevent crashes when DB unavailable
+        $iparrays = safe_query(function() {
+            return DB::table('ipaddresses')->pluck('ipaddress')->toArray();
+        }, []);
 
-            $ipaddress = DB::table('ipaddresses')->pluck('ipaddress');
-            $iparrays = $ipaddress->toArray();
-            $userip = $request->ip();
+        $userip = $request->ip();
 
-            if (in_array($userip, $iparrays)) {
-                 abort(403, "You are restricted to access the site.");
-            }
-
-        } catch (\Exception $e) {
-            // If DB is down or any error occurs, log and allow the request to continue
-            Log::warning('BlockIpAddressMiddleware skipped: ' . $e->getMessage());
-            return $next($request);
+        if (in_array($userip, $iparrays)) {
+            abort(403, "You are restricted to access the site.");
         }
+
         return $next($request);
     }
 }

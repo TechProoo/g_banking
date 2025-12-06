@@ -16,8 +16,9 @@ FROM php:8.1-apache
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git curl unzip libzip-dev libpng-dev libjpeg-dev libfreetype6-dev \
     libonig-dev libxml2-dev libicu-dev libgmp-dev pkg-config \
+    libpq-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_mysql mbstring bcmath gd intl zip gmp \
+    && docker-php-ext-install pdo_mysql pdo_pgsql mbstring bcmath gd intl zip gmp \
     && docker-php-ext-install fileinfo ctype \
     && pecl install redis && docker-php-ext-enable redis \
     && rm -rf /var/lib/apt/lists/*

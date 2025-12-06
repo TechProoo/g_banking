@@ -88,7 +88,7 @@ class JetstreamServiceProvider extends ServiceProvider
                 'title' => 'Register an Account',
                 'user_country'=>$user_country,
                 'countries'=>$countries,
-                'settings' => (Schema::hasTable('settings') ? Settings::find(1) : null),
+                'settings' => safe_settings(),
             ]);
         });
 
