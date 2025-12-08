@@ -14,15 +14,5 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
          \App\Models\Adverts::factory(7)->create();
-         
-         // Create default admin user
-         \App\Models\Admin::create([
-             'firstName' => 'Admin',
-             'lastName' => 'User',
-             'email' => 'ore@gmail.com',
-             'password' => bcrypt('ore123-'),
-             'type' => 'Super Admin',
-             'status' => 'active'
-         ]);
     }
 }

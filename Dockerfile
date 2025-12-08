@@ -79,6 +79,10 @@ RUN if [ -f /var/www/html/public/index.php ]; then \
 # Permissions (ensure apache can write where needed)
 RUN chown -R www-data:www-data storage bootstrap/cache vendor public || true
 
+# Copy and set up entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+ENTRYPOINT ["docker-entrypoint.sh"]
