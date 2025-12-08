@@ -9,6 +9,9 @@ echo "Clearing cached config..."
 php artisan config:clear || true
 php artisan cache:clear || true
 
+echo "Creating storage symlink..."
+php artisan storage:link || true
+
 echo "Running database migrations..."
 php artisan migrate --force || echo "Migrations failed or already run"
 
