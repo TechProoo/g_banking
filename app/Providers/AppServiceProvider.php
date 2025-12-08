@@ -34,6 +34,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Force HTTPS in production
+        if (config('app.env') === 'production' || request()->isSecure()) {
+            \URL::forceScheme('https');
+        }
+
         FacadesStorage::extend('sftp', function ($app, $config) {
             return new Filesystem(new SftpAdapter($config));
         });
