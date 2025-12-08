@@ -58,6 +58,14 @@ RUN php artisan package:discover --ansi || true
 # Copy compiled frontend assets
 COPY --from=node_builder /app/public /var/www/html/public
 
+# Copy static asset folders to public directory
+RUN cp -r dash public/dash 2>/dev/null || true
+RUN cp -r dash2 public/dash2 2>/dev/null || true
+RUN cp -r css public/css 2>/dev/null || true
+RUN cp -r temp public/temp 2>/dev/null || true
+RUN cp -r error public/error 2>/dev/null || true
+RUN cp -r images public/images 2>/dev/null || true
+
 # Laravel optimizations (skip caching - will be done at runtime with real env vars)
 RUN php artisan key:generate --force || true
 
