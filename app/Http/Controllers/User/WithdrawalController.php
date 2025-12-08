@@ -134,7 +134,7 @@ class WithdrawalController extends Controller
 
         //get user last investment package
         User_plans::where('user', Auth::user()->id)
-            ->where('active', 'yes')
+            ->where('activate', 'yes')
             ->orderBy('activated_at', 'asc')->first();
 
         //get user

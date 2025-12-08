@@ -82,7 +82,7 @@ class ViewsController extends Controller
             'deposits' =>Deposit::where('user', Auth::user()->id)->orderBy('id', 'desc')->take(4)
                     ->get(),
             'trading_accounts' => Mt4Details::where('client_id', Auth::user()->id)->count(),
-            'plans' => User_plans::where('user', Auth::user()->id)->where('active', 'yes')->orderByDesc('id')->skip(0)->take(2)->get(),
+            'plans' => User_plans::where('user', Auth::user()->id)->where('activate', 'yes')->orderByDesc('id')->skip(0)->take(2)->get(),
             't_history' => Tp_Transaction::where('user', Auth::user()->id)
                 ->where('type', '<>', 'ROI')
                 ->orderByDesc('id')->skip(0)->take(10)
@@ -311,7 +311,7 @@ public function internationaltransfer()
                 ->with(array(
                     'numOfPlan' => User_plans::where('user', Auth::user()->id)->count(),
                     'title' => 'Your packages',
-                    'plans' => User_plans::where('user', Auth::user()->id)->where('active', $sort)->orderByDesc('id')->paginate(10),
+                    'plans' => User_plans::where('user', Auth::user()->id)->where('activate', $sort)->orderByDesc('id')->paginate(10),
                     'settings' => Settings::where('id', '1')->first(),
                 ));
         }

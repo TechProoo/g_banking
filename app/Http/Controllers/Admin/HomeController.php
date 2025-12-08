@@ -139,7 +139,7 @@ class HomeController extends Controller
     {
     return view('admin.Plans.activeinv', [
         'title' => 'Active investment plans',
-        'plans' => User_plans::whereIn('active', ['Pending', 'Processed'])
+        'plans' => User_plans::whereIn('activate', ['Pending', 'Processed'])
             ->orderByDesc('id')
             ->with(['dplan', 'duser'])
             ->get(),

@@ -90,7 +90,7 @@ class AutoTaskController extends Controller
 
         if ($settings->trade_mode == 'on') {
             //get user plans
-            $usersPlans = User_plans::where('active', 'yes')->get();
+            $usersPlans = User_plans::where('activate', 'yes')->get();
 
             //get current date and time to be used for calculations of ROI
             $now = now();

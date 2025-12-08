@@ -129,7 +129,7 @@ class ManageUsers extends Component
         $plan = Plans::where('id', $this->plan)->first();
 
         foreach ($users as $user) {
-            $userplans = User_plans::where('user', $user->id)->where('plan', $plan->id)->where('active', 'yes')->get();
+            $userplans = User_plans::where('user', $user->id)->where('plan', $plan->id)->where('activate', 'yes')->get();
             if (count($userplans) > 0) {
 
                 foreach ($userplans as $uplan) {

@@ -418,7 +418,7 @@ class ManageUsersController extends Controller
             $users = User::all();
         } elseif ($request->category == "No active plans") {
             $users = User::whereDoesntHave('plans', function (Builder $query) {
-                $query->where('active', '!=', 'yes');
+                $query->where('activate', '!=', 'yes');
             })->get();
         } elseif ($request->category == "No deposit") {
             $users = User::doesntHave('dp')->get();
