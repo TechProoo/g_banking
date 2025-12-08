@@ -58,11 +58,8 @@ RUN php artisan package:discover --ansi || true
 # Copy compiled frontend assets
 COPY --from=node_builder /app/public /var/www/html/public
 
-# Laravel optimizations
+# Laravel optimizations (skip caching - will be done at runtime with real env vars)
 RUN php artisan key:generate --force || true
-RUN php artisan config:cache || true
-RUN php artisan route:cache || true
-RUN php artisan view:cache || true
 
 # enable common Apache modules
 RUN a2enmod rewrite headers expires deflate

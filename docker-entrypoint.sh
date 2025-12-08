@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+echo "Clearing cached config..."
+php artisan config:clear || true
+php artisan cache:clear || true
+
 echo "Running database migrations..."
 php artisan migrate --force || echo "Migrations failed or already run"
 
