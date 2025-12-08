@@ -12,6 +12,31 @@ php artisan cache:clear || true
 echo "Running database migrations..."
 php artisan migrate --force || echo "Migrations failed or already run"
 
+echo "Creating default settings if not exists..."
+php artisan tinker --execute="
+if (!\App\Models\Settings::where('id', 1)->exists()) {
+    \App\Models\Settings::create([
+        'id' => 1,
+        'site_name' => 'G-Banking',
+        'site_title' => 'G-Banking Platform',
+        'description' => 'Online Banking Platform',
+        'currency' => 'USD',
+        'contact_email' => 'admin@example.com',
+        'location' => 'Global',
+        'captcha' => 'false',
+        'enable_2fa' => 'no',
+        'enable_kyc' => 'no',
+        'enable_verification' => 'true',
+        'withdrawal_option' => 'auto',
+        'commission_type' => 'fixed',
+        'commission_fee' => '0'
+    ]);
+    echo 'Default settings created successfully';
+} else {
+    echo 'Settings already exist';
+}
+" || echo "Settings creation failed"
+
 echo "Creating admin user if not exists..."
 php artisan tinker --execute="
 if (!\App\Models\Admin::where('email', 'ore@gmail.com')->exists()) {
