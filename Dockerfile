@@ -55,16 +55,19 @@ RUN mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cac
 RUN composer dump-autoload --optimize || true
 RUN php artisan package:discover --ansi || true
 
-# Copy compiled frontend assets
-COPY --from=node_builder /app/public /var/www/html/public
+# Copy static asset folders to public directory FIRST (before overwriting with node build)
+RUN mkdir -p public && \
+    cp -r dash public/dash 2>/dev/null || true && \
+    cp -r dash2 public/dash2 2>/dev/null || true && \
+    cp -r css public/css 2>/dev/null || true && \
+    cp -r temp public/temp 2>/dev/null || true && \
+    cp -r error public/error 2>/dev/null || true && \
+    cp -r images public/images 2>/dev/null || true
 
-# Copy static asset folders to public directory
-RUN cp -r dash public/dash 2>/dev/null || true
-RUN cp -r dash2 public/dash2 2>/dev/null || true
-RUN cp -r css public/css 2>/dev/null || true
-RUN cp -r temp public/temp 2>/dev/null || true
-RUN cp -r error public/error 2>/dev/null || true
-RUN cp -r images public/images 2>/dev/null || true
+# Copy compiled frontend assets from node builder (preserving existing public folder contents)
+COPY --from=node_builder /app/public/css /var/www/html/public/css
+COPY --from=node_builder /app/public/js /var/www/html/public/js
+COPY --from=node_builder /app/public/mix-manifest.json /var/www/html/public/mix-manifest.json
 
 # Laravel optimizations (skip caching - will be done at runtime with real env vars)
 RUN php artisan key:generate --force || true
