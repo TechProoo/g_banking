@@ -64,10 +64,9 @@ RUN mkdir -p public && \
     cp -r error public/error 2>/dev/null || true && \
     cp -r images public/images 2>/dev/null || true
 
-# Copy compiled frontend assets from node builder (preserving existing public folder contents)
-COPY --from=node_builder /app/public/css /var/www/html/public/css
-COPY --from=node_builder /app/public/js /var/www/html/public/js
-COPY --from=node_builder /app/public/mix-manifest.json /var/www/html/public/mix-manifest.json
+# Copy compiled frontend assets from node builder (merge with existing public folder)
+RUN --mount=type=bind,from=node_builder,source=/app/public,target=/tmp/node_public \
+    cp -r /tmp/node_public/* public/ 2>/dev/null || true
 
 # Laravel optimizations (skip caching - will be done at runtime with real env vars)
 RUN php artisan key:generate --force || true
