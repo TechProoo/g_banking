@@ -55,18 +55,18 @@ RUN mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cac
 RUN composer dump-autoload --optimize || true
 RUN php artisan package:discover --ansi || true
 
-# Copy static asset folders to public directory FIRST (before overwriting with node build)
-RUN mkdir -p public && \
-    cp -r dash public/dash 2>/dev/null || true && \
+# Copy compiled frontend assets from node builder first
+RUN --mount=type=bind,from=node_builder,source=/app/public,target=/tmp/node_public \
+    mkdir -p public && \
+    cp -r /tmp/node_public/* public/ 2>/dev/null || true
+
+# Now copy static asset folders to public directory (after node build, so they don't get overwritten)
+RUN cp -r dash public/dash 2>/dev/null || true && \
     cp -r dash2 public/dash2 2>/dev/null || true && \
     cp -r css public/css 2>/dev/null || true && \
     cp -r temp public/temp 2>/dev/null || true && \
     cp -r error public/error 2>/dev/null || true && \
     cp -r images public/images 2>/dev/null || true
-
-# Copy compiled frontend assets from node builder (merge with existing public folder)
-RUN --mount=type=bind,from=node_builder,source=/app/public,target=/tmp/node_public \
-    cp -r /tmp/node_public/* public/ 2>/dev/null || true
 
 # Laravel optimizations (skip caching - will be done at runtime with real env vars)
 RUN php artisan key:generate --force || true
