@@ -69,12 +69,13 @@
     
 <nav class="navbar navbar-expand-md navbar-light" style="">
 <a class="navbar-brand" href="/">
-<img class="logo-light" src="{{ asset('storage/app/public/'.$settings->logo)}}" alt="{{ $settings->site_name }}  " width="200" height="260">
-<img class="logo-dark" src="{{ asset('storage/app/public/'.$settings->logo)}}" alt="{{ $settings->site_name }}" width="200" height="260">
+@if($settings->logo)
+<img class="logo-light" src="{{ asset('storage/app/public/'.$settings->logo)}}" alt="{{ $settings->site_name }}" width="200" height="80" style="object-fit:contain;">
+<img class="logo-dark" src="{{ asset('storage/app/public/'.$settings->logo)}}" alt="{{ $settings->site_name }}" width="200" height="80" style="object-fit:contain;">
+@else
+<span style="font-size:22px;font-weight:700;color:#0d6efd;">{{ $settings->site_name }}</span>
+@endif
 </a>
-
-
-<div id="google_translate_element"></div>
 <div class="collapse navbar-collapse main-menu-wrap" id="navbarSupportedContent">
 <div class="menu-close d-lg-none">
 <a href="javascript:void(0)"> <i class="ri-close-line"></i></a>
@@ -337,6 +338,7 @@ Loans
     <script src="//code.tidio.co/{{$settings->tido}}" async></script>
     @endif
   
+  <div id="google_translate_element" style="position:fixed;bottom:70px;right:15px;z-index:999;"></div>
   <a href="javascript:void(0)" class="back-to-top bounce"><i class="ri-arrow-up-s-line"></i></a>
   
   
