@@ -9,6 +9,8 @@ class Agent extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['agent', 'total_refered', 'total_activated', 'earnings'];
+
     public function duser(){
     	return $this->belongsTo('App\Models\User', 'agent');
     }
