@@ -57,5 +57,9 @@ if (!\App\Models\Admin::where('email', 'ore@gmail.com')->exists()) {
 }
 " || echo "Admin creation failed"
 
+echo "Fixing Apache MPM conflict..."
+rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.*
+a2enmod mpm_prefork 2>/dev/null || true
+
 echo "Starting Apache..."
 exec apache2-foreground
