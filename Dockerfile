@@ -69,10 +69,11 @@ RUN cp -r dash public/dash 2>/dev/null || true && \
 # Laravel optimizations (skip caching - will be done at runtime with real env vars)
 RUN php artisan key:generate --force || true
 
-# Fix MPM conflict: directly remove event/worker symlinks, then enable only prefork
-RUN rm -f /etc/apache2/mods-enabled/mpm_event.* \
-          /etc/apache2/mods-enabled/mpm_worker.* \
-    && a2enmod mpm_prefork
+# Fix MPM conflict: remove ALL mpm symlinks, then re-link only prefork
+RUN rm -f /etc/apache2/mods-enabled/mpm_*.conf \
+          /etc/apache2/mods-enabled/mpm_*.load \
+    && ln -sf /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/mpm_prefork.conf \
+    && ln -sf /etc/apache2/mods-available/mpm_prefork.load /etc/apache2/mods-enabled/mpm_prefork.load
 
 # enable common Apache modules
 RUN a2enmod rewrite headers expires deflate
