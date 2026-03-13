@@ -21,7 +21,7 @@
         <link rel="stylesheet" href="{{ asset('dash/css/bootstrap.min.css') }}">
         <link rel="stylesheet" href="{{ asset('dash/css/fonts.min.css') }}">
         @php
-            $theme = $settings->website_theme == 'blue.css' ? 'atlantis.min.css' : $settings->website_theme;
+            $theme = ($settings->website_theme && $settings->website_theme != 'blue.css') ? $settings->website_theme : 'atlantis.min.css';
         @endphp
         <link rel="stylesheet" href="{{ asset('dash/css/' . $theme) }}">
         <link rel="stylesheet" href="{{ asset('dash/css/customs.css') }}">
