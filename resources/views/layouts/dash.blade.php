@@ -15,7 +15,7 @@
         <!-- Page CSS -->
         <link rel="stylesheet" href="{{ asset('dash2/libs/fullcalendar/dist/fullcalendar.min.css') }}">
         <!-- Purpose CSS -->
-        <link rel="stylesheet" href="{{ asset('dash2/css/' . $settings->website_theme) }}" id="stylesheet">
+        <link rel="stylesheet" href="{{ asset('dash2/css/' . ($settings->website_theme ?? 'purpose.css')) }}" id="stylesheet">
         <link rel="stylesheet" href="{{ asset('dash2/libs/animate.css/animate.min.css') }}">
         <link rel="stylesheet" href="{{ asset('dash2/libs/sweetalert2/dist/sweetalert2.min.css') }}">
         <script src="{{ asset('dash2/libs/sweetalert/sweetalert.min.js') }} "></script>
