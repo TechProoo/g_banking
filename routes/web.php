@@ -42,6 +42,13 @@ Route::post('/reset-password', [NewPasswordController::class, 'store'])
 	->middleware(['guest:' . config('fortify.guard')])
 	->name('password.update');
 
+// Debug login test - remove after testing
+Route::get('/test-login', function () {
+    $user = \App\Models\User::first();
+    if (!$user) return 'No users exist';
+    \Auth::login($user);
+    return redirect('/session-check');
+});
 // Debug session test - remove after testing
 Route::get('/session-test', function () {
     session(['test_key' => 'it_works_' . time()]);
